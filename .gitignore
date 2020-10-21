@@ -1,1 +1,11 @@
-*.crx
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### Published content ###
+publish
+
+### Extension Private Key ###
+key

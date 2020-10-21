@@ -1,4 +1,4 @@
-# Google Chrome Verified Access demo extension
+# Chrome Verified Access API demo extension
 
 This Chrome extension demonstrates how to authenticate in web application based on the [Chrome Verified Access API](https://developers.google.com/chrome/verified-access).
 
