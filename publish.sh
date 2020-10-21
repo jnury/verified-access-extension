@@ -4,7 +4,7 @@
 dir="./extension"
 key="./key/extension.pem"
 name="cvaa-demo"
-crx="./publish/$name.crx"
+crx="./publish/extension.crx"
 pub="$name.pub"
 sig="$name.sig"
 zip="$name.zip"
