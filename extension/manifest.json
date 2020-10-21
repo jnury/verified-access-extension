@@ -1,11 +1,9 @@
 {
   "name": "Chrome Verified Access API demo",
   "description": "A Chrome Verified Access API demo extension",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "manifest_version": 2,
-  "permissions": [
-    "enterprise.platformKeys"
-  ],
+  "permissions": [ "enterprise.platformKeys", "storage" ],
   "background": {
     "scripts": ["background.js"],
     "persistent": false

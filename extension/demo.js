@@ -6,14 +6,29 @@
 
 var encodedChallenge = '';
 var challengeResponse = '';
+let apiKeyField = document.getElementById('apiKey');
 let requestChallenge = document.getElementById('requestChallenge');
 let generateDeviceResponse = document.getElementById('generateDeviceResponse');
 let generateUserResponse = document.getElementById('generateUserResponse');
 let verifyChallengeResponse = document.getElementById('verifyChallengeResponse');
 
+// Load API Key from local storage
+chrome.storage.sync.get('apiKey', function(data) {
+    if (data) {
+        apiKeyField.value = data.apiKey;
+    }
+});
+
+// Save the API Key to local storage (if changed)
+apiKeyField.onchange = function(element) {
+    chrome.storage.sync.set({apiKey: apiKeyField.value}, function() {
+        console.log('API Key saved to local storage');
+    });
+};
+
 // Request challenge from URL
 requestChallenge.onclick = function(element) {
-    let apiKey = document.getElementById('apiKey').value;
+    let apiKey = apiKeyField.value;
     if (apiKey != '') {
         let challengeUrlString = 'https://verifiedaccess.googleapis.com/v1/challenge?key=' + apiKey;
         $('#encodedChallenge').empty().append('Requesting challenge ...');
