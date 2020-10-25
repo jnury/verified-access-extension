@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="includes/bootstrap.min.css">
+
+        <title>Hello, world!</title>
+    </head>
+    <body>
+        <div class="container">
+            <div class="row">
+                <div class="col col-lg-2">
+                </div>
+                <div class="col-md-auto">
+                    <h2>Chrome Verified Access API demo</h2>
+                    <h3>First step: Google API Key</h3>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="apiKey">Your Google API Key</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="apiKey" aria-label="apiKey" aria-describedby="basic-addon1">
+                    </div>
+
+                    <h3>Second step: Request a challenge from Google API</h3>
+                    <button id="requestChallenge" type="button" class="btn btn-outline-dark">Request a challenge</button>
+                    <div id="encodedChallenge"></div>
+
+                    <h3>Third step: Generate a challenge response locally</h3>
+                    <div>
+                        <button id="generateDeviceResponse" type="button" class="btn btn-outline-dark">Generate a device response</button>
+                        <button id="generateUserResponse" type="button" class="btn btn-outline-dark">Generate a user response</button>
+                    </div>
+                    <div id="challengeResponse"></div>
+
+                    <h3>Fourth step: Verify this response with Google API</h3>
+                    <div class="input-group mb-3">
+                        <div class="input-group-prepend">
+                            <span class="input-group-text" id="expectedIdentity">Expected Identity</span>
+                        </div>
+                        <input type="text" class="form-control" placeholder="expectedIdentity" aria-label="expectedIdentity" aria-describedby="basic-addon1">
+                        <button id="verifyChallengeResponse" type="button" class="btn btn-outline-dark">Verify challenge response</button>
+                    </div>
+                    
+                    <div id="verifyResult"></div>
+                    <script src="demo.js"></script>
+                </div>
+                <div class="col col-lg-2">
+                </div>
+            </div>
+        </div>
+
+
+        <script src="includes/jquery-3.5.1.slim.min.js"></script>
+        <script src="includes/bootstrap.bundle.min.js"></script>
+
+    </body>
+</html>
