@@ -1,31 +1,151 @@
-<html>
+<!doctype html>
+<html lang="en">
     <head>
+        <!-- Required meta tags -->
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+        <!-- Bootstrap CSS -->
+        <link rel="stylesheet" href="includes/bootstrap.min.css">
+
         <title>Chrome Verified Access API demo</title>
-        <script src="jquery.js"></script>
-        <script src="cvaa-functions.js"></script>
     </head>
     <body>
-        <h1>Chrome Verified Access API demo</h1>
-        <h2>First step: Google API Key</h2>
-        <div>Your Google API Key <input id="apiKey" type="text"></input></div>
+        <div class="container">
+            <div class="row">
+                <div class="col col">
+                </div>
+                <div class="col col-9">
+                    <p class="lead">
+                        <h1>Chrome Verified Access API demo</h1>
+                    </p>
 
-        <h2>Second step: Request a challenge from Google API</h2>
-        <button id="requestChallenge">Request a challenge</button></div>
-        <div id="encodedChallenge"></div>
+                    <!-- API warning -->
+                    <div class="alert alert-danger collapse" role="alert" id="apiWarning">
+                        This extension cannot access the local <b>enterprise.platformKeys</b> API. Please check <a href="https://developers.google.com/chrome/verified-access/developer-guide?hl=en_US#prerequisites_to_verified_access">Prerequisites to Verified Access</a>. API calls will be simulated, so authentication will never succeed. It's only to demonstrate the process ans test communication with the server part of the demo.
+                    </div>
 
-        <h2>Third step: Generate a challenge response locally</h2>
-        <div>
-            <button id="generateDeviceResponse">Generate a device response</button>
-            <button id="generateUserResponse">Generate a user response</button>
+                    <!-- Step 1 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 1 - Google API Key</h4>
+                            <p class="card-text">To request a challenge from your application extension, you need an API Key (see <a href="https://cloud.google.com/docs/authentication/api-keys">Using API keys</a>).</p>
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Your Google API Key</span>
+                                </div>
+                                <input id="apiKey" type="text" class="form-control" placeholder="apiKey">
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+
+                    <!-- Step 2 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 2 - Request a challenge from Google API</h4>
+                            <p class="card-text">Call the <a href="https://developers.google.com/chrome/verified-access/reference/rest/v1/challenge/create">Challenge Create</a> method from the Verified Access API to get a challenge suitable for the local API.</p>
+                            <p><button id="requestChallenge" type="button" class="btn btn-outline-dark">Request a challenge</button></p>
+                            <div class="form-group">
+                                <textarea disabled class="form-control collapse text-monospace" id="encodedChallenge" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+
+                    <!-- Step 3 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 3 - Generate a challenge response locally</h4>
+                            <p class="card-text">Call the local <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> API to generate a challenge response. You can generate an user or a device response depending which identity you want to verify.
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="challengeType" id="userResponse" value="user" checked>
+                                    <label class="form-check-label" for="userResponse">
+                                        User response - to identify the logged Enterprise user
+                                    </label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="challengeType" id="deviceResponse" value="device">
+                                    <label class="form-check-label" for="deviceResponse">
+                                        Device response - to identify the Enterprise ChromeBook
+                                    </label>
+                                </div>
+                            </p>
+                            <p><button id="generateResponse" type="button" class="btn btn-outline-dark">Generate a response</button></p>
+                            <div class="form-group">
+                                <textarea disabled class="form-control collapse text-monospace" id="challengeResponse" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>  
+                    <br/>
+
+                    <!-- Step 4 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 4 - Expected identity</h4>
+                            <p class="card-text">Provide the identity you expect to found in the challenge response. For a user response, expected identity is the user's email address; For a device response, expected identity is the Enterprise domain. This extension tries to determine the correct value based on the local <a href="https://developer.chrome.com/apps/identity">chrome.identity</a> API.
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Expected identity</span>
+                                </div>
+                                <input id="expectedIdentity" type="text" class="form-control" placeholder="login@domain.com">
+                            </div>
+                        </div>
+                    </div>  
+                    <br/>
+
+                    <!-- Step 5 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 5 - Custom API Server</h4>
+                            <p class="card-text">In order to verify the challenge response, you need a custom API server. This server will use the <a href="https://developers.google.com/chrome/verified-access/reference/rest/v1/challenge/verify">Challenge Verify</a> method from the Verified Access API to verify that challenge response correspond to the expected identity. You can find a demo server <a href="https://github.com/jnury/verified-access-server">here</a>.</p>
+                            <div class="input-group mb-3">
+                                <div class="input-group-prepend">
+                                    <span class="input-group-text">Custom API URL</span>
+                                </div>
+                                <input id="customApiUrl" type="text" class="form-control" placeholder="https://myserver.com/authentication">
+                            </div>
+                        </div>
+                    </div> 
+                    <br/>
+
+                    <!-- Step 6 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Step 6 - Send data to remote server</h4>
+                            <p class="card-text">Send expected identity and challenge response to your custom API.</p>
+                            <p><button id="sendResponse" type="button" class="btn btn-outline-dark">Send data</button></p>
+                            <div class="form-group">
+                                <textarea disabled class="form-control collapse text-monospace" id="remoteStatus" rows="6"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <br/>
+                    
+                    <!-- Error Modal -->
+                    <div class="modal fade" id="errorModal" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                            <h5 class="modal-title" id="errorModalLabel">Error</h5>
+                            <button type="button" class="close" data-dismiss="modal">
+                                <span>&times;</span>
+                            </button>
+                            </div>
+                            <div class="modal-body" id="errorModalMessage">
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col col">
+                </div>
+            </div>
         </div>
-        <div id="challengeResponse"></div>
-
-        <h2>Fourth step: Verify this response with Google API</h2>
-        <div>
-            Expected Identity <input id="expectedIdentity" type="text"></input>
-            <button id="verifyChallengeResponse">Verify challenge response</button>
-        </div>
-        <div id="verifyResult"></div>
+        <script src="cvaa-functions.js"></script>
+        <script src="includes/jquery-3.5.1.min.js"></script>
+        <script src="includes/bootstrap.bundle.min.js"></script>
         <script src="demo.js"></script>
+
     </body>
 </html>

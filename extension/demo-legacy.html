@@ -1,0 +1,31 @@
+<html>
+    <head>
+        <title>Chrome Verified Access API demo</title>
+        <script src="jquery.js"></script>
+        <script src="cvaa-functions.js"></script>
+    </head>
+    <body>
+        <h1>Chrome Verified Access API demo</h1>
+        <h2>First step: Google API Key</h2>
+        <div>Your Google API Key <input id="apiKey" type="text"></input></div>
+
+        <h2>Second step: Request a challenge from Google API</h2>
+        <button id="requestChallenge">Request a challenge</button></div>
+        <div id="encodedChallenge"></div>
+
+        <h2>Third step: Generate a challenge response locally</h2>
+        <div>
+            <button id="generateDeviceResponse">Generate a device response</button>
+            <button id="generateUserResponse">Generate a user response</button>
+        </div>
+        <div id="challengeResponse"></div>
+
+        <h2>Fourth step: Verify this response with Google API</h2>
+        <div>
+            Expected Identity <input id="expectedIdentity" type="text"></input>
+            <button id="verifyChallengeResponse">Verify challenge response</button>
+        </div>
+        <div id="verifyResult"></div>
+        <script src="demo.js"></script>
+    </body>
+</html>
