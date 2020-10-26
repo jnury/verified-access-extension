@@ -22,7 +22,7 @@
 
                     <!-- API warning -->
                     <div class="alert alert-danger collapse" role="alert" id="apiWarning">
-                        This extension cannot access the local <b>enterprise.platformKeys</b> API. Please check <a href="https://developers.google.com/chrome/verified-access/developer-guide?hl=en_US#prerequisites_to_verified_access">Prerequisites to Verified Access</a>. API calls will be simulated, so authentication will never succeed. It's only to demonstrate the process ans test communication with the server part of the demo.
+                        This extension cannot access the local <b>enterprise.platformKeys</b> API. Please check <a href="https://developers.google.com/chrome/verified-access/developer-guide?hl=en_US#prerequisites_to_verified_access">Prerequisites to Verified Access</a>. API calls will be simulated, so authentication will never succeed. It's only to demonstrate the process and test communication with the server part of the demo.
                     </div>
 
                     <!-- Step 1 -->
@@ -57,7 +57,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Step 3 - Generate a challenge response locally</h4>
-                            <p class="card-text">Call the local <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> API to generate a challenge response. You can generate an user or a device response depending which identity you want to verify.
+                            <p class="card-text">Call the local <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> API to generate a challenge response. You can generate a user or a device response depending on which identity you want to verify.
                                 <div class="form-check">
                                     <input class="form-check-input" type="radio" name="challengeType" id="userResponse" value="user" checked>
                                     <label class="form-check-label" for="userResponse">
@@ -83,7 +83,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Step 4 - Expected identity</h4>
-                            <p class="card-text">Provide the identity you expect to found in the challenge response. For a user response, expected identity is the user's email address; For a device response, expected identity is the Enterprise domain. This extension tries to determine the correct value based on the local <a href="https://developer.chrome.com/apps/identity">chrome.identity</a> API.
+                            <p class="card-text">Provide the identity you expect to found in the challenge response. For a user response, expected identity is the user's email address; for a device response, expected identity is the Enterprise domain. This extension tries to determine the correct value based on the local <a href="https://developer.chrome.com/apps/identity">chrome.identity</a> API.
                             <div class="input-group">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Expected identity</span>
@@ -98,7 +98,7 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Step 5 - Custom API Server</h4>
-                            <p class="card-text">In order to verify the challenge response, you need a custom API server. This server will use the <a href="https://developers.google.com/chrome/verified-access/reference/rest/v1/challenge/verify">Challenge Verify</a> method from the Verified Access API to verify that challenge response correspond to the expected identity. You can find a demo server <a href="https://github.com/jnury/verified-access-server">here</a>.</p>
+                            <p class="card-text">In order to verify the challenge response, you need a custom API server. This server will use the <a href="https://developers.google.com/chrome/verified-access/reference/rest/v1/challenge/verify">Challenge Verify</a> method from the Verified Access API to verify that the challenge response correspond to the expected identity. You can find a demo server <a href="https://github.com/jnury/verified-access-server">here</a>.</p>
                             <div class="input-group mb-3">
                                 <div class="input-group-prepend">
                                     <span class="input-group-text">Custom API URL</span>
