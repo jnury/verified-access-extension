@@ -9,6 +9,9 @@ var challengeResponse = '';
 var simulation = false;
 var challengeType = $("input[name='challengeType']:checked").val();
 
+console.log(varintEncode(4323));
+console.log(varintDecode("ã!"));
+
 // Trap errors
 window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
     let message = '<pre>An error occured in: ' + url + '<br>On line: ' + lineNumber + '<br>Message: ' + errorMsg + '</pre>'
@@ -106,7 +109,9 @@ $('#requestChallenge').click(function(element) {
                 if (xmlhttp.readyState === 4) {
                     if (xmlhttp.status === 200) {
                         var challenge = xmlhttp.responseText;
+                        console.log(challenge)
                         encodedChallenge = encodeChallenge(challenge);
+                        console.log(encodedChallenge)
                         $('#encodedChallenge').empty().append(encodedChallenge);
                     } else {
                         $('#encodedChallenge').empty().append('ERROR: ' + xmlhttp.responseText);
@@ -155,7 +160,7 @@ $('#generateResponse').click(function(element) {
     }
 });
 
-// CAll remote API
+// Call remote API
 $('#sendResponse').click(function(element) {
     $('#remoteStatus').collapse('show');
     let customApiUrl = $('#customApiUrl').val();

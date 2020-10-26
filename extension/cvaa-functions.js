@@ -5,7 +5,7 @@
 // Functions from https://developers.google.com/chrome/verified-access/developer-guide with some adaptations + utility functions
 
 /**
- * encodeChallenge convert JSON challenge into base64 encoded byte array
+ * encodeChallenge convert JSON SignedData into base64 encoded byte array
  * @param {string} challenge JSON encoded challenge protobuf
  * @return {string} base64 encoded challenge protobuf
  */
@@ -18,6 +18,22 @@ var encodeChallenge = function(challenge) {
         window.atob(challengeData), window.atob(challengeSignature));
 
     return window.btoa(protobufBinary);
+};
+
+/**
+ * protoDecodeResponse convert base64 encoded byte array into JSON SignedData
+ * @param {string} response binary encoded challenge protobuf
+ * @return {string} JSON encoded challenge protobuf
+ */
+var encodeChallenge = function(response) {
+    let data = '';
+    let signature = '';
+
+    var signedData = new Object();
+    signedData.data = "Test";
+    signedData.signature  = "25";
+
+    return JSON.stringify(signedData);
 };
   
 /**
@@ -61,6 +77,20 @@ var varintEncode = function(number) {
         return String.fromCharCode(number);
     } else {
         return String.fromCharCode(128 + (number & 0x7f), number >>> 7);
+    }
+};
+
+/**
+ * varintDecode retrieve integer number from the binary encoding
+ * @param {string} string binary varint-encoded number
+ * @return {number} integer number 
+ */
+var varintDecode = function(string) {
+    // This only works correctly for numbers 0 through 16383 (0x3FFF)
+    if (string.length == 1) {
+        return string.charCodeAt(0);
+    } else {
+        return string.charCodeAt(1) << 7 + string.charCodeAt(0) - 128;
     }
 };
 
