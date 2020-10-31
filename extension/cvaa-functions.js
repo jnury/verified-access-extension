@@ -2,48 +2,17 @@
 // Use of this source code is governed by a MIT license that can be
 // found in the LICENSE file.
 
-// Functions from https://developers.google.com/chrome/verified-access/developer-guide with some adaptations + utility functions
+// Functions inspired of https://developers.google.com/chrome/verified-access/developer-guide with some adaptations + utility functions
 
 /**
- * encodeChallenge convert JSON SignedData into base64 encoded byte array
- * @param {string} challenge JSON encoded challenge protobuf
- * @return {string} base64 encoded challenge protobuf
+ * encodeSignedData convert SignedData into base64 encoded SignedData protobuf
+ * @param {object} signedData SignedData object
+ * @return {string} base64 encoded SignedData protobuf
  */
-var encodeChallenge = function(challenge) {
-    var jsonChallenge = JSON.parse(challenge);
-    var challengeData = jsonChallenge.challenge.data;
-    var challengeSignature = jsonChallenge.challenge.signature;
-
-    var protobufBinary = protoEncodeChallenge(
-        window.atob(challengeData), window.atob(challengeSignature));
-
-    return window.btoa(protobufBinary);
-};
-
-/**
- * protoDecodeResponse convert base64 encoded byte array into JSON SignedData
- * @param {string} response binary encoded challenge protobuf
- * @return {string} JSON encoded challenge protobuf
- */
-var encodeChallenge = function(response) {
-    let data = '';
-    let signature = '';
-
-    var signedData = new Object();
-    signedData.data = "Test";
-    signedData.signature  = "25";
-
-    return JSON.stringify(signedData);
-};
-  
-/**
- * protoEncodeChallenge produce binary encoding of the challenge protobuf
- * @param {string} dataBinary binary data field
- * @param {string} signatureBinary binary signature field
- * @return {string} binary encoded challenge protobuf
- */
-var protoEncodeChallenge = function(dataBinary, signatureBinary) {
-    var protoEncoded = '';
+var encodeSignedData = function(signedData) {
+    let dataBinary = window.atob(signedData.data);
+    let signatureBinary = window.atob(signedData.signature);
+    let protoEncoded = '';
 
     // See https://developers.google.com/protocol-buffers/docs/encoding
     // for encoding details.
@@ -63,7 +32,74 @@ var protoEncodeChallenge = function(dataBinary, signatureBinary) {
     // add signature
     protoEncoded += signatureBinary;
 
-    return protoEncoded;
+    return window.btoa(protoEncoded);
+};
+
+/**
+ * decodeSignedData convert base64 encoded SignedData protobuf into SignedData object
+ * @param {string} base64SignedData base64 encoded SignedData protobuf
+ * @return {object} SignedData object
+ */
+var decodeSignedData = function(base64SignedData) {
+    let data = '';
+    let signature = '';
+    let binary = window.atob(base64SignedData);
+
+    if (binary[0] == '\u000A') {
+
+        // Get len of the data part
+        let index = 0;
+        let len = binary[index + 1];
+        let start = index + 2;
+        let stop = start + varintDecode(len);
+        if (binary[stop] != '\u0012') {
+            // Data length may be 2 bytes long
+            len = binary[index + 1] + binary[index + 2];
+            start = index + 3;
+            stop = start + varintDecode(len);
+            if (binary[stop] != '\u0012') {
+                console.log("Decoding error: bad data length")
+                return ''
+            }
+        }
+
+        // Get the data part
+        for (var i = start; i < stop; i++) {
+            data += binary[i];
+        }
+
+        // Get signature length
+        index = stop;
+        len = binary[index + 1]
+        start = index + 2
+        stop = start + varintDecode(len)
+        if (stop != binary.length) {
+            // Signature length may be 2 bytes long
+            len = binary[index + 1] + binary[index + 2];
+            start = index + 3;
+            stop = start + varintDecode(len)
+            if (stop != binary.length) {
+                console.log("Decoding error: bad signature length")
+                return ''
+            }
+        }
+
+        // Get the signature part
+        for (var i = start; i < stop; i++) {
+            signature += binary[i];
+        }
+        
+    }
+    else {
+        console.log("Decoding error: first byte is not 0A")
+        return ''
+    }
+
+    let signedData = new Object();
+    signedData.data = window.btoa(data);
+    signedData.signature  = window.btoa(signature);
+
+    return signedData;
 };
   
 /**
@@ -90,21 +126,21 @@ var varintDecode = function(string) {
     if (string.length == 1) {
         return string.charCodeAt(0);
     } else {
-        return string.charCodeAt(1) << 7 + string.charCodeAt(0) - 128;
+        return ((string.charCodeAt(1) << 7) + (string.charCodeAt(0) - 128));
     }
 };
 
 /**
  * testPlatformKeysAvailability test if required local APIs are available (these APIs are only available on ChromeBooks)
- * @return {boolean} binary varint-encoded number
+ * @return {boolean} Required APIs availability
  */
-function testPlatformKeysAvailability() {
+var testPlatformKeysAvailability = function() {
     if (typeof chrome.enterprise !== 'undefined') {
         return (typeof chrome.enterprise.platformKeys !== 'undefined');
     } else {
-        return false
+        return false;
     }
-}
+};
 
 /**
  * ab2base64str convert an ArrayBuffer to base64 string
@@ -113,14 +149,14 @@ function testPlatformKeysAvailability() {
  * of the ArrayBuffer
  */
 var ab2base64str = function(buf) {
-    var binary = '';
-    var bytes = new Uint8Array(buf);
-    var len = bytes.byteLength;
+    let binary = '';
+    let bytes = new Uint8Array(buf);
+    let len = bytes.byteLength;
     for (var i = 0; i < len; i++) {
         binary += String.fromCharCode(bytes[i]);
     }
     return window.btoa(binary);
-}
+};
 
 /**
  * decodestr2ab convert a base64 encoded string to ArrayBuffer
@@ -128,11 +164,11 @@ var ab2base64str = function(buf) {
  * @return {ArrayBuffer} ArrayBuffer representation of the string
  */
 var decodestr2ab = function(str) {
-    var binary_string =  window.atob(str);
-    var len = binary_string.length;
-    var bytes = new Uint8Array(len);
-    for (var i = 0; i < len; i++)        {
+    let binary_string =  window.atob(str);
+    let len = binary_string.length;
+    let bytes = new Uint8Array(len);
+    for (var i = 0; i < len; i++) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
-}
+};

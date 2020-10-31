@@ -5,12 +5,9 @@
 'use strict';
 
 var encodedChallenge = '';
-var challengeResponse = '';
+var challengeResponse = null;
 var simulation = false;
 var challengeType = $("input[name='challengeType']:checked").val();
-
-console.log(varintEncode(4323));
-console.log(varintDecode("ã!"));
 
 // Trap errors
 window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
@@ -45,9 +42,9 @@ var ChallengeCallback = function(response) {
     if (chrome.extension.lastError) {
         $('#challengeResponse').empty().append('ERROR: ' + chrome.extension.lastError.message);
     } else {
-        var responseAsString = ab2base64str(response);
-        challengeResponse = responseAsString;
-        $('#challengeResponse').empty().append(responseAsString);
+        let responseAsString = ab2base64str(response);
+        challengeResponse = decodeSignedData(responseAsString);
+        $('#challengeResponse').empty().append(challengeResponse);
     }
 };
 
@@ -69,9 +66,7 @@ chrome.storage.sync.get('apiKey', function(data) {
 
 // Save the API Key to local storage (if changed)
 $('#apiKey').on('input', function() {
-    chrome.storage.sync.set({apiKey: $('#apiKey').val()}, function() {
-        console.log('API Key saved to local storage');
-    });
+    chrome.storage.sync.set({apiKey: $('#apiKey').val()}, function() {});
 });
 
 // Load custom API URL from local storage
@@ -83,9 +78,7 @@ chrome.storage.sync.get('customApiUrl', function(data) {
 
 // Save the custom API URL to local storage (if changed)
 $('#customApiUrl').on('input', function() {
-    chrome.storage.sync.set({customApiUrl: $('#customApiUrl').val()}, function() {
-        console.log('Custom API URL saved to local storage');
-    });
+    chrome.storage.sync.set({customApiUrl: $('#customApiUrl').val()}, function() {});
 });
 
 // Update challenge type (when changed)
@@ -97,33 +90,31 @@ $("input[name='challengeType']").change(function(element) {
 // Request challenge from Google API
 $('#requestChallenge').click(function(element) {
     let apiKey = $('#apiKey').val();
-    $('#encodedChallenge').collapse('show');
+    $('#challenge').collapse('show');
     if (apiKey) {
         try {
             let challengeUrlString = 'https://verifiedaccess.googleapis.com/v1/challenge?key=' + apiKey;
-            $('#encodedChallenge').empty().append('Requesting challenge ...');
+            $('#challenge').empty().append('Requesting challenge ...');
             let xmlhttp = new XMLHttpRequest();
             xmlhttp.open('POST', challengeUrlString, true);
             xmlhttp.send();
             xmlhttp.onreadystatechange = function() {
                 if (xmlhttp.readyState === 4) {
                     if (xmlhttp.status === 200) {
-                        var challenge = xmlhttp.responseText;
-                        console.log(challenge)
-                        encodedChallenge = encodeChallenge(challenge);
-                        console.log(encodedChallenge)
-                        $('#encodedChallenge').empty().append(encodedChallenge);
+                        let response = JSON.parse(xmlhttp.responseText);
+                        $('#challenge').empty().append(JSON.stringify(response.challenge, null, 1));
+                        encodedChallenge = encodeSignedData(response.challenge);
                     } else {
-                        $('#encodedChallenge').empty().append('ERROR: ' + xmlhttp.responseText);
+                        $('#challenge').empty().append('ERROR: ' + xmlhttp.responseText);
                     }
                 }
             };
         } catch (error) {
-            $('#encodedChallenge').empty().append('ERROR: ' + error);
+            $('#challenge').empty().append('ERROR: ' + error);
         }
     }
     else {
-        $('#encodedChallenge').empty().append('ERROR: please enter your Google API Key (step 1)');
+        $('#challenge').empty().append('ERROR: please enter your Google API Key (step 1)');
     }
 });
 
@@ -134,8 +125,8 @@ $('#generateResponse').click(function(element) {
         try {
             if (challengeType == 'device') {
                 if (simulation) {
-                    challengeResponse = 'A_Fake_Device_Response'
-                    $('#challengeResponse').empty().append(challengeResponse);
+                    challengeResponse = decodeSignedData("ChdBX0Zha2VfRGV2aWNlX1Jlc3BvbnNlChIhQV9GYWtlX0RldmljZV9SZXNwb25zZV9TaWduYXR1cmUK");
+                    $('#challengeResponse').empty().append(JSON.stringify(challengeResponse, null, 1));
                 } else {
                     $('#challengeResponse').empty().append('Generating Device response ...');
                     chrome.enterprise.platformKeys.challengeMachineKey(
@@ -143,8 +134,8 @@ $('#generateResponse').click(function(element) {
                 }
             } else {
                 if (simulation) {
-                    challengeResponse = 'A_Fake_User_Response'
-                    $('#challengeResponse').empty().append(challengeResponse);
+                    challengeResponse = decodeSignedData("ChVBX0Zha2VfVXNlcl9SZXNwb25zZQoSH0FfRmFrZV9Vc2VyX1Jlc3BvbnNlX1NpZ25hdHVyZQo=");
+                    $('#challengeResponse').empty().append(JSON.stringify(challengeResponse, null, 1));
                 } else {
                     $('#challengeResponse').empty().append('Generating User response ...');
                     chrome.enterprise.platformKeys.challengeUserKey(
@@ -167,12 +158,17 @@ $('#sendResponse').click(function(element) {
     if (customApiUrl) {
         let expectedIdentity = $('#expectedIdentity').val();
         if (expectedIdentity) {
-            if (challengeResponse != '') {
+            if (challengeResponse) {
                 $('#remoteStatus').empty().append('Calling ' + customApiUrl + ' ...');
+
+                let data = new Object();
+                data.challengeResponse = challengeResponse;
+                data.expectedIdentity = expectedIdentity;
+
                 $.ajax({
                     type: "POST",
                     url: customApiUrl,
-                    data: JSON.stringify({ "expectedIdentity": expectedIdentity, "challengeResponse": challengeResponse}),
+                    data: JSON.stringify(data),
                     contentType : 'application/json',
                     dataType: "text",
                     success: function(data, status, xhr) { $('#remoteStatus').empty().append(data); },
