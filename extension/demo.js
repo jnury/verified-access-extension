@@ -44,7 +44,7 @@ var ChallengeCallback = function(response) {
     } else {
         let responseAsString = ab2base64str(response);
         challengeResponse = decodeSignedData(responseAsString);
-        $('#challengeResponse').empty().append(challengeResponse);
+        $('#challengeResponse').empty().append(JSON.stringify(challengeResponse, null, 1));
     }
 };
 
