@@ -12,6 +12,7 @@ var challengeType = $("input[name='challengeType']:checked").val();
 // Trap errors
 window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
     let message = '<pre>An error occured in: ' + url + '<br>On line: ' + lineNumber + '<br>Message: ' + errorMsg + '</pre>'
+    $('#errorModalLabel').empty().append("Error");
     $('#errorModalMessage').empty().append(message);
     $('#errorModal').modal('show')
     return false;
@@ -109,6 +110,13 @@ $('#requestChallenge').click(function(element) {
                     }
                 }
             };
+
+            // Start to count 60 seconds expiration for challenge
+            setTimeout(() => {
+                $('#errorModalLabel').empty().append("Warning");
+                $('#errorModalMessage').empty().append("Challenge is older than 60 seconds, you can still generate a response but the verification will fail.");
+                $('#errorModal').modal('show')
+            }, 60000);
         } catch (error) {
             $('#challenge').empty().append('ERROR: ' + error);
         }
