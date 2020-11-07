@@ -131,23 +131,30 @@ $('#generateResponse').click(function(element) {
     $('#challengeResponse').collapse('show');
     if (encodedChallenge != '') {
         try {
+            let includeCSR = false;
+            if ($('#includeCSR').is(":checked")) {
+                includeCSR = true;
+            }
+
             if (challengeType == 'device') {
                 if (simulation) {
+                    // Return a dummy value
                     challengeResponse = decodeSignedData("ChdBX0Zha2VfRGV2aWNlX1Jlc3BvbnNlChIhQV9GYWtlX0RldmljZV9SZXNwb25zZV9TaWduYXR1cmUK");
                     $('#challengeResponse').empty().append(JSON.stringify(challengeResponse, null, 1));
                 } else {
                     $('#challengeResponse').empty().append('Generating Device response ...');
                     chrome.enterprise.platformKeys.challengeMachineKey(
-                        decodestr2ab(encodedChallenge), true, ChallengeCallback);
+                        decodestr2ab(encodedChallenge), includeCSR, ChallengeCallback);
                 }
             } else {
                 if (simulation) {
+                    // Return a dummy value
                     challengeResponse = decodeSignedData("ChVBX0Zha2VfVXNlcl9SZXNwb25zZQoSH0FfRmFrZV9Vc2VyX1Jlc3BvbnNlX1NpZ25hdHVyZQo=");
                     $('#challengeResponse').empty().append(JSON.stringify(challengeResponse, null, 1));
                 } else {
                     $('#challengeResponse').empty().append('Generating User response ...');
                     chrome.enterprise.platformKeys.challengeUserKey(
-                        decodestr2ab(encodedChallenge), true, ChallengeCallback);
+                        decodestr2ab(encodedChallenge), includeCSR, ChallengeCallback);
                 }
             }
         } catch (error) {

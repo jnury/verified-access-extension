@@ -59,17 +59,24 @@
                     <div class="card">
                         <div class="card-body">
                             <h4 class="card-title">Step 3 - Generate a challenge response locally</h4>
-                            <p class="card-text">Call the local <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> API to generate a challenge response. You can generate a user or a device response depending on which identity you want to verify.
+                            <p class="card-text" style="margin-bottom: .5em;">Call the local <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> API to generate a challenge response. You can generate a user or a device response depending on which identity you want to verify.</p>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="challengeType" id="userResponse" value="user" checked>
+                                <label class="form-check-label" for="userResponse">
+                                    User response - to identify the logged Enterprise user
+                                </label>
+                            </div>
+                            <div class="form-check">
+                                <input class="form-check-input" type="radio" name="challengeType" id="deviceResponse" value="device">
+                                <label class="form-check-label" for="deviceResponse">
+                                    Device response - to identify the Enterprise ChromeBook
+                                </label>
+                            </div>
+                            <p class="card-text" style="margin-bottom: .5em;">
                                 <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="challengeType" id="userResponse" value="user" checked>
-                                    <label class="form-check-label" for="userResponse">
-                                        User response - to identify the logged Enterprise user
-                                    </label>
-                                </div>
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="challengeType" id="deviceResponse" value="device">
-                                    <label class="form-check-label" for="deviceResponse">
-                                        Device response - to identify the Enterprise ChromeBook
+                                    <input class="form-check-input" type="checkbox" value="" id="includeCSR" checked>
+                                    <label class="form-check-label" for="includeCSR">
+                                      Include a Certificate Signing Request (CSR) in the response
                                     </label>
                                 </div>
                             </p>
