@@ -9,3 +9,7 @@ publish
 
 ### Extension Private Key ###
 key
+
+### Others ###
+.DS_Store
+ 

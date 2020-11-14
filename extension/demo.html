@@ -138,7 +138,7 @@
                     <!-- Step 7 -->
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Step 7 - Import issued certificate</h4>
+                            <h4 class="card-title">Bonus step 1 - Import issued certificate</h4>
                             <p class="card-text">If you included a Certificate Signing Request (CSR) in your response, your custom API server may have signed it. If so, you can now import the signed certificate in the user or machine store. Note: the following field will auto-fill if your custom API return a <i>certificateDerB64</i> field.</i></p>
                             <div class="input-group" style="margin-bottom: 1em;">
                                 <textarea class="form-control text-monospace" id="issuedCertificate" rows="6"></textarea>
@@ -153,25 +153,15 @@
                     <!-- Step 8 -->
                     <div class="card">
                         <div class="card-body">
-                            <h4 class="card-title">Step 8 - List local certificates</h4>
-                            <h5>User certificates</h5>
-                            <table class="table table-sm" id="userCertificateList">
-                                <thead>
-                                  <tr>
-                                    <th data-field="cn" scope="col">CN</th>
-                                    <th data-field="issuer" scope="col">Issuer</th>
-                                    <th data-field="expiration" scope="col">Expiration</th>
-                                  </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                            <h5>System certificates</h5>
-                            <table class="table table-sm" id="systemCertificateList">
+                            <h4 class="card-title">Bonus step 2 - List local certificates</h4>
+                            <p class="card-text">Use <a href="https://developer.chrome.com/extensions/enterprise_platformKeys">chrome.enterprise.platformKey</a> to list certificates in user and system certificate stores.</p>
+                            <table class="table table-sm" id="certificateList">
                                 <thead>
                                     <tr>
-                                    <th data-field="cn" scope="col">CN</th>
-                                    <th data-field="issuer" scope="col">Issuer</th>
-                                    <th data-field="expiration" scope="col">Expiration</th>
+                                        <th data-field="token" scope="col">Store</th>
+                                        <th data-field="cn" scope="col">CN</th>
+                                        <th data-field="issuer" scope="col">Issuer</th>
+                                        <th data-field="expiration" scope="col">Expiration</th>
                                     </tr>
                                 </thead>
                                 <tbody></tbody>
@@ -180,6 +170,15 @@
                                 <button id="refreshCertificateList" type="button" class="btn btn-outline-dark">Refresh</button>
                             </div>
                             
+                        </div>
+                    </div>
+                    <br/>
+
+                    <!-- Logs -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h4 class="card-title">Extension Logs</h4>
+                            <textarea disabled class="form-control text-monospace" id="logs" rows="10" style="margin-top: 1em;"></textarea>
                         </div>
                     </div>
                     <br/>

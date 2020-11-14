@@ -4,12 +4,17 @@
 
 'use strict';
 
-import {testPlatformKeysAvailability, ab2base64str, decodestr2ab, decodeSignedData, encodeSignedData} from './includes/utils.js';
+// Chrome Verified Access API related functions
+import {testPlatformKeysAvailability, ab2base64str, decodestr2ab, decodeSignedData, encodeSignedData} from './includes/cvaa.js';
+
+// Certificate related functions (only needed for bonus steps)
+import {decodeDerCertificate} from './includes/utils.js';
 
 var encodedChallenge = '';
 var challengeResponse = null;
 var simulation = false;
 var challengeType = $("input[name='challengeType']:checked").val();
+var log = $('#logs');
 
 // Trap errors
 window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
@@ -56,6 +61,7 @@ if (!testPlatformKeysAvailability()) {
     $('#apiWarning').collapse('show');
     simulation = true;
 }
+log.append(`Simulation mode: ${simulation}\n`);
 
 // Init Expected identity field
 chrome.identity.getProfileUserInfo(GetIdentityCallback);
@@ -63,7 +69,10 @@ chrome.identity.getProfileUserInfo(GetIdentityCallback);
 // Load API Key from local storage
 chrome.storage.sync.get('apiKey', function(data) {
     if (data) {
-        $('#apiKey').val(data.apiKey)
+        $('#apiKey').val(data.apiKey);
+        log.append(`API Key loaded from local storage\n`);
+    } else {
+        log.append(`API Key not found in local storage\n`);
     }
 });
 
@@ -217,8 +226,8 @@ $('#sendResponse').click(function(element) {
 // Install certificate
 $('#installIssuedCertificate').click(function(element) {
     let issuedCertificate = $('#issuedCertificate').val();
+    let binaryCertificate;
     if (issuedCertificate) {
-        let binaryCertificate;
         try {
             binaryCertificate = decodestr2ab(issuedCertificate);
         } catch {
@@ -246,41 +255,33 @@ $('#installIssuedCertificate').click(function(element) {
     }
 });
 
-// Fill a certificate table with data
-var buildCertificateTable = function(table, certificateList) {
-    table.empty();
-    for (let i = 0; i < certificateList.length; i++) {
-        let certificate = certificateList[i];
-        table.append(`<tr><td>${certificate.cn}</td><td>${certificate.issuer}</td><td>${certificate.expiration}</td></tr>`);
-    }
-};
-
 // Refresh certificate list
 var refreshCertificateList = function() {
+    log.append(`Refreshing certificate List\n`);
+    let table = $("#certificateList tbody");
+    table.empty();
     if (simulation) {
-        // Fill user list with dummy data
-        let certificateList = [
-            {'cn': 'user@domain.com', 'issuer': 'myCorp CA', 'expiration': '31.12.2020'},
-            {'cn': 'user@domain.com', 'issuer': 'another CA', 'expiration': '31.12.2021'}
-        ];
-        buildCertificateTable($("#userCertificateList tbody"), certificateList);
-
-        // Fill system list with dummy data
-        certificateList = [
-            {'cn': 'ChromeDevice01', 'issuer': 'myCorp CA', 'expiration': '31.12.2020'},
-            {'cn': 'ChromeDevice01', 'issuer': 'another CA', 'expiration': '31.12.2021'}
-        ];
-        buildCertificateTable($("#systemCertificateList tbody"), certificateList);
-
+        table.append(`<tr><td>user</td><td>user@domain.com</td><td>myCorp CA</td><td>31.12.2020</td></tr>`);
+        table.append(`<tr><td>system</td><td>device001.domain.com</td><td>myCorp CA</td><td>31.12.2020</td></tr>`);
     } else {
         // refresh user certificate list
         chrome.enterprise.platformKeys.getCertificates('user', function(certificates){
-
+            log.append(`Found ${certificates.length} certificate(s) in 'user' store\n`);
+            for (let i = 0; i < certificates.length; i++) {
+                let certificate = decodeDerCertificate(certificates[i]);
+                certificate.token = 'user';
+                table.append(`<tr><td>${certificate.token}</td><td>${certificate.cn}</td><td>${certificate.issuer}</td><td>${certificate.expiration}</td></tr>`);
+            }
         });
 
         // refresh system certificate list
         chrome.enterprise.platformKeys.getCertificates('system', function(certificates){
-
+            log.append(`Found ${certificates.length} certificate(s) in 'system' store\n`);
+            for (let i = 0; i < certificates.length; i++) {
+                let certificate = decodeDerCertificate(certificates[i]);
+                certificate.token = 'system';
+                table.append(`<tr><td>${certificate.token}</td><td>${certificate.cn}</td><td>${certificate.issuer}</td><td>${certificate.expiration}</td></tr>`);
+            }
         });
     }
 };
