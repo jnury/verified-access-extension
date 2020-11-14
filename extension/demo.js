@@ -4,6 +4,8 @@
 
 'use strict';
 
+import {testPlatformKeysAvailability, ab2base64str, decodestr2ab, decodeSignedData, encodeSignedData} from './includes/utils.js';
+
 var encodedChallenge = '';
 var challengeResponse = null;
 var simulation = false;
@@ -14,7 +16,7 @@ window.onerror = function myErrorHandler(errorMsg, url, lineNumber) {
     let message = '<pre>An error occured in: ' + url + '<br>On line: ' + lineNumber + '<br>Message: ' + errorMsg + '</pre>'
     $('#errorModalLabel').empty().append("Error");
     $('#errorModalMessage').empty().append(message);
-    $('#errorModal').modal('show')
+    $('#errorModal').modal('show');
     return false;
 }
 
@@ -186,7 +188,16 @@ $('#sendResponse').click(function(element) {
                     data: JSON.stringify(data),
                     contentType : 'application/json',
                     dataType: "text",
-                    success: function(data, status, xhr) { $('#remoteStatus').empty().append(data); },
+                    success: function(data, status, xhr) { 
+                        $('#remoteStatus').empty().append(data);
+                        // Try to get a certificate from API response
+                        try {
+                            let response = JSON.parse(data);
+                            if (response.certificateDerB64 != undefined) {
+                                $('#issuedCertificate').val(response.certificateDerB64)
+                            }
+                        } catch {}
+                    },
                     error: function(request, status, error) { $('#remoteStatus').empty().append('ERROR: ' + request.responseText); }
                 });
             }
@@ -202,3 +213,80 @@ $('#sendResponse').click(function(element) {
         $('#remoteStatus').empty().append('ERROR: please provide your custom API url (step 5)');
     }
 });
+
+// Install certificate
+$('#installIssuedCertificate').click(function(element) {
+    let issuedCertificate = $('#issuedCertificate').val();
+    if (issuedCertificate) {
+        let binaryCertificate;
+        try {
+            binaryCertificate = decodestr2ab(issuedCertificate);
+        } catch {
+            $('#errorModalLabel').empty().append('Error');
+            $('#errorModalMessage').empty().append('Certificate content is not valid (cannot decode base64)');
+            $('#errorModal').modal('show');
+            return;
+        }
+    } else {
+        $('#errorModalLabel').empty().append('Error');
+        $('#errorModalMessage').empty().append('Please provide a certificate to import');
+        $('#errorModal').modal('show');
+    }
+
+    let tokenId = 'user';
+    if (challengeType == 'device') {
+        tokenId = 'system';
+    }
+
+    // Import certificate
+    if (!simulation) {
+        chrome.enterprise.platformKeys.importCertificate(tokenId, binaryCertificate, function() {
+            refreshCertificateList();
+        });
+    }
+});
+
+// Fill a certificate table with data
+var buildCertificateTable = function(table, certificateList) {
+    table.empty();
+    for (let i = 0; i < certificateList.length; i++) {
+        let certificate = certificateList[i];
+        table.append(`<tr><td>${certificate.cn}</td><td>${certificate.issuer}</td><td>${certificate.expiration}</td></tr>`);
+    }
+};
+
+// Refresh certificate list
+var refreshCertificateList = function() {
+    if (simulation) {
+        // Fill user list with dummy data
+        let certificateList = [
+            {'cn': 'user@domain.com', 'issuer': 'myCorp CA', 'expiration': '31.12.2020'},
+            {'cn': 'user@domain.com', 'issuer': 'another CA', 'expiration': '31.12.2021'}
+        ];
+        buildCertificateTable($("#userCertificateList tbody"), certificateList);
+
+        // Fill system list with dummy data
+        certificateList = [
+            {'cn': 'ChromeDevice01', 'issuer': 'myCorp CA', 'expiration': '31.12.2020'},
+            {'cn': 'ChromeDevice01', 'issuer': 'another CA', 'expiration': '31.12.2021'}
+        ];
+        buildCertificateTable($("#systemCertificateList tbody"), certificateList);
+
+    } else {
+        // refresh user certificate list
+        chrome.enterprise.platformKeys.getCertificates('user', function(certificates){
+
+        });
+
+        // refresh system certificate list
+        chrome.enterprise.platformKeys.getCertificates('system', function(certificates){
+
+        });
+    }
+};
+
+// Initial Certificate List filling
+refreshCertificateList();
+
+// Refresh button handler
+$('#refreshCertificateList').click(function(element) { refreshCertificateList(); });

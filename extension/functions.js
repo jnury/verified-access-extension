@@ -4,6 +4,9 @@
 
 // Functions inspired of https://developers.google.com/chrome/verified-access/developer-guide with some adaptations + utility functions
 
+import * as asn1js from "./includes/asn1.js";
+import Certificate from "./includes/pkijs/Certificate.js";
+
 /**
  * encodeSignedData convert SignedData into base64 encoded SignedData protobuf
  * @param {object} signedData SignedData object
@@ -171,4 +174,46 @@ var decodestr2ab = function(str) {
         bytes[i] = binary_string.charCodeAt(i);
     }
     return bytes.buffer;
+};
+
+/**
+ * decodeDerCertificate convert a DER encoded X.509 certificate into an object
+ * @param {ArrayBuffer} derCertificate DER encoded X.509 certificate
+ * @return {Object} certificate details
+ */
+var decodeDerCertificate = function(derCertificate) {
+    let certificateAsn1 = asn1js.fromBER(certificateDer);
+    let certificate = new Certificate({ schema: certificateAsn1.result });
+
+    // Display certificate in JSON format
+    if (debugFlag) {
+        console.log("Certificates found in security chip");
+        console.log(certificate.toJSON());
+    }
+
+    let attributeTypeAndValue;
+
+    // Retrieve issuer CN
+    let issuerCN = "Not defined";
+    for(let j=0; j < certificate.issuer.typesAndValues.length; j++) {
+        attributeTypeAndValue = certificate.issuer.typesAndValues[j];
+        if (attributeTypeAndValue.type == "2.5.4.3") {
+            issuerCN = attributeTypeAndValue.value.valueBlock.value;
+        }
+    }
+
+    // Retrieve certificate CN
+    let certificateCN = "Not defined";
+    for(let j=0; j < certificate.subject.typesAndValues.length; j++) {
+        attributeTypeAndValue = certificate.subject.typesAndValues[j];
+        if (attributeTypeAndValue.type == "2.5.4.3") {
+            certificateCN = attributeTypeAndValue.value.valueBlock.value;
+        }
+    }
+
+    return {
+        'cn': certificateCN,
+        'issuer': issuerCN,
+        'expiration': 'unknown'
+    }
 };
