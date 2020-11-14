@@ -66,26 +66,39 @@ log.append(`Simulation mode: ${simulation}\n`);
 // Init Expected identity field
 chrome.identity.getProfileUserInfo(GetIdentityCallback);
 
-// Load API Key from local storage
-chrome.storage.sync.get('apiKey', function(data) {
-    if (data) {
+// Load API Key from Managed storage, or Local storage
+chrome.storage.managed.get('apiKey', function(data) {
+    if (data.apiKey !== undefined) {
         $('#apiKey').val(data.apiKey);
-        log.append(`API Key loaded from local storage\n`);
+        log.append(`API Key loaded from managed storage\n`);
     } else {
-        log.append(`API Key not found in local storage\n`);
+        chrome.storage.sync.get('apiKey', function(data) {
+            if (data.apiKey !== undefined) {
+                $('#apiKey').val(data.apiKey);
+                log.append(`API Key loaded from local storage\n`);
+            }
+        });
+    }
+});
+
+// Load Custom URL from Managed storage, or Local storage
+chrome.storage.managed.get('customApiUrl', function(data) {
+    if (data.customApiUrl !== undefined) {
+        $('#customApiUrl').val(data.customApiUrl);
+        log.append(`Custom API URL loaded from managed storage\n`);
+    } else {
+        chrome.storage.sync.get('customApiUrl', function(data) {
+            if (data.customApiUrl !== undefined) {
+                $('#customApiUrl').val(data.customApiUrl);
+                log.append(`Custom API URL loaded from local storage\n`);
+            }
+        });
     }
 });
 
 // Save the API Key to local storage (if changed)
 $('#apiKey').on('input', function() {
     chrome.storage.sync.set({apiKey: $('#apiKey').val()}, function() {});
-});
-
-// Load custom API URL from local storage
-chrome.storage.sync.get('customApiUrl', function(data) {
-    if (data) {
-        $('#customApiUrl').val(data.customApiUrl)
-    }
 });
 
 // Save the custom API URL to local storage (if changed)

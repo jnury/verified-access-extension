@@ -1,0 +1,15 @@
+{
+  "type": "object",
+  "properties": {
+    "apiKey": {
+      "title": "Google API Key",
+      "description": "Key for requesting challenges from Chrome Verified API",
+      "type": "string"
+    },
+    "customApiUrl": {
+      "title": "Custom API URL",
+      "description": "URL of the custom API that validate the challenge response",
+      "type": "string"
+    }
+  }
+}

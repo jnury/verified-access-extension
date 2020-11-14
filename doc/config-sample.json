@@ -1,8 +1,8 @@
 {
-  "settings": {
-    "Value": {
-      "apiKey": "7a17f43294e9c96dbb296da576d54bd3",
-      "customApiUrl": "http://verified-access.company.com/authenticate"
-    }
+  "apiKey": {
+    "Value": "7a17f43294e-9c96dbb296da576d54bd3"
+  },
+  "customApiUrl": {
+    "Value": "http://verified-access.company.com/authenticate"
   }
 }
