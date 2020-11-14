@@ -1,0 +1,19 @@
+{
+  "type": "object",
+  "properties": {
+    "settings": {
+      "description": "Extension settings",
+      "type": "object",
+      "properties": {
+        "apiKey": {
+          "description": "Google API Key for requesting challenge",
+          "type": "string"
+        },
+        "customApiUrl": {
+          "description": "Custom API URL",
+          "type": "string"
+        }
+      }
+    }
+  }
+}
