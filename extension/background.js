@@ -6,23 +6,36 @@
 
 // Handle click on extension icon
 chrome.browserAction.onClicked.addListener(function(activeTab) {
-    let newURL = chrome.extension.getURL('demo.html');
-    chrome.tabs.create({ url: newURL });
-});
 
-// Load application policy into local storage
-chrome.runtime.onInstalled.addListener(function() {    
-    chrome.storage.managed.get(["settings"], function(result) {
-        if (result["settings"] !== undefined) {
-            if (result["settings"]["apiKey"] !== undefined) {
-                apiKey = result["settings"]["apiKey"];
-                chrome.storage.local.set({apiKey: apiKey});
-            }
+    // All this code is to avoid openning same tab twice, don't hesitate to propose a better solution ;-)
+    let openNewTab = function(){
+        let newURL = chrome.extension.getURL('demo.html');
+        chrome.tabs.create({ url: newURL }, function(tab){
+            chrome.storage.local.set({tabId: tab.id})
+        });
+    };
 
-            if (result["settings"]["customApiUrl"] !== undefined) {
-                customApiUrl = result["settings"]["customApiUrl"];
-                chrome.storage.local.set({customApiUrl: customApiUrl});
+    chrome.storage.local.get(["tabId"], function(result) {
+        let tabId = 0;
+        if (result != undefined) {
+            if (result.tabId != undefined) {
+                tabId = result.tabId;
             }
+        } 
+        
+        if (tabId != 0) {
+            chrome.tabs.query({currentWindow: true}, function(tabs){
+                for (let i = 0; i < tabs.length; i++) {
+                    if (tabs[i].id == tabId) {
+                        let index = tabs[i].index;
+                        chrome.tabs.highlight({tabs: index});
+                        return;
+                    }
+                }
+                openNewTab();
+            });
+        } else {
+            openNewTab();
         }
     });
 });
