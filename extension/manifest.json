@@ -1,7 +1,7 @@
 {
   "name": "Chrome Verified Access API demo",
-  "description": "Explore how Chrome Verified Access API can be used to verify your ChromeBook users and/or devices.",
-  "version": "1.2.14",
+  "description": "Explore how Chrome Verified Access API can be used to verify your Chromebook users and/or devices.",
+  "version": "1.2.15",
   "manifest_version": 2,
   "permissions": [ 
     "enterprise.platformKeys",

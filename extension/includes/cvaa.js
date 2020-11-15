@@ -131,7 +131,7 @@ function varintDecode(string) {
 };
 
 /**
- * testPlatformKeysAvailability test if required local APIs are available (these APIs are only available on ChromeBooks)
+ * testPlatformKeysAvailability test if required local APIs are available (these APIs are only available on Chromebooks)
  * @return {boolean} Required APIs availability
  */
 export function testPlatformKeysAvailability() {
